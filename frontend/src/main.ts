@@ -92,4 +92,13 @@ const app = createApp(App)
 
 app.use(router)
 app.use(i18n)
-app.mount('#app') 
+app.mount('#app')
+
+// Register PWA Service Worker
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {
+      // Service worker registration failed or not available in dev mode
+    })
+  })
+} 
