@@ -67,7 +67,7 @@ class MessageSSEEvent(BaseSSEEvent):
     data: MessageEventData
 
     @classmethod
-    async def from_event_async(cls, event: MessageEvent) -> Self:
+    async def from_event_async(cls, event: MessageEvent, user_id: Optional[str] = None) -> Self:
         return cls(
             data=MessageEventData(
                 **BaseEventData.base_event_data(event),
@@ -90,11 +90,11 @@ class ToolSSEEvent(BaseSSEEvent):
     data: ToolEventData
 
     @classmethod
-    async def from_event_async(cls, event: ToolEvent) -> Self:
+    async def from_event_async(cls, event: ToolEvent, user_id: Optional[str] = None) -> Self:
         content = event.tool_content
         if isinstance(content, BrowserToolContent):
             from app.interfaces.dependencies import get_file_service
-            content = BrowserToolContent(screenshot=await get_file_service().create_signed_url(content.screenshot))
+            content = BrowserToolContent(screenshot=await get_file_service().create_signed_url(content.screenshot, user_id))
         return cls(
             data=ToolEventData(
                 **BaseEventData.base_event_data(event),
@@ -235,18 +235,18 @@ class EventMapper:
         return mapping
     
     @staticmethod
-    async def event_to_sse_event(event: AgentEvent) -> AgentSSEEvent:
+    async def event_to_sse_event(event: AgentEvent, user_id: Optional[str] = None) -> AgentSSEEvent:
         # Get mapping dynamically
         event_type_mapping = EventMapper._get_event_type_mapping()
-        
+
         # Find matching SSE event class
         event_mapping = event_type_mapping.get(event.type)
-        
+
         if event_mapping:
             # Prioritize from_event_async class method if exists, otherwise use from_event
             sse_event_class = event_mapping.sse_event_class
             if hasattr(sse_event_class, 'from_event_async'):
-                sse_event = await sse_event_class.from_event_async(event)
+                sse_event = await sse_event_class.from_event_async(event, user_id=user_id)
             else:
                 sse_event = sse_event_class.from_event(event)
             return sse_event
@@ -254,8 +254,8 @@ class EventMapper:
         return CommonEventData.from_event(event)
     
     @staticmethod
-    async def events_to_sse_events(events: List[AgentEvent]) -> List[AgentSSEEvent]:
+    async def events_to_sse_events(events: List[AgentEvent], user_id: Optional[str] = None) -> List[AgentSSEEvent]:
         """Create SSE event list from event list"""
         return list(filter(lambda x: x is not None, [
-            await EventMapper.event_to_sse_event(event) for event in events if event
+            await EventMapper.event_to_sse_event(event, user_id=user_id) for event in events if event
         ]))

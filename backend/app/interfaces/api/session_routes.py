@@ -54,7 +54,7 @@ async def get_session(
         session_id=session.id,
         title=session.title,
         status=session.status,
-        events=await EventMapper.events_to_sse_events(session.events),
+        events=await EventMapper.events_to_sse_events(session.events, user_id=current_user.id),
         is_shared=session.is_shared
     ))
 
@@ -147,7 +147,7 @@ async def chat(
             attachments=request.attachments
         ):
             logger.debug(f"Received event from chat: {event}")
-            sse_event = await EventMapper.event_to_sse_event(event)
+            sse_event = await EventMapper.event_to_sse_event(event, user_id=current_user.id)
             logger.debug(f"Received event: {sse_event}")
             if sse_event:
                 yield ServerSentEvent(
@@ -384,11 +384,11 @@ async def get_shared_session(
     session = await agent_service.get_shared_session(session_id)
     if not session:
         raise NotFoundError("Shared session not found")
-    
+
     return APIResponse.success(SharedSessionResponse(
         session_id=session.id,
         title=session.title,
         status=session.status,
-        events=await EventMapper.events_to_sse_events(session.events),
+        events=await EventMapper.events_to_sse_events(session.events, user_id=session.user_id),
         is_shared=session.is_shared
     ))
