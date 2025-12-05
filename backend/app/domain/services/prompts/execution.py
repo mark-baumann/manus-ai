@@ -21,6 +21,7 @@ Note:
     - What you have done by tools
     - What you are going to do or have done within one sentence
 - If you need to ask user for input or take control of the browser, you must use message_ask_user tool to ask user for input
+- **CRITICAL for browser tasks**: After using browser_navigate, browser_click, or browser_input, you MUST immediately call browser_view to show the user a screenshot of what is displayed in the browser. The user cannot see the browser window directly - they can only see it through screenshots!
 - Don't tell how to do the task, determine by yourself.
 - Deliver the final result to user not the todo list, advice or plan
 

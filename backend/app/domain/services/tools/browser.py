@@ -19,7 +19,7 @@ class BrowserTool(BaseTool):
     
     @tool(
         name="browser_view",
-        description="View content of the current browser page. Use for checking the latest state of previously opened pages.",
+        description="View content of the current browser page and take a screenshot to show the user what is currently displayed. CRITICAL: You MUST call this after browser_navigate, browser_click, or browser_input to show the user what is happening in the browser. The user cannot see the browser directly, so screenshots are their only way to see browser activity.",
         parameters={},
         required=[]
     )
@@ -33,7 +33,7 @@ class BrowserTool(BaseTool):
     
     @tool(
         name="browser_navigate",
-        description="Navigate browser to specified URL. Use when accessing new pages is needed.",
+        description="Navigate browser to specified URL. Use when accessing new pages is needed. IMPORTANT: After navigating, you MUST call browser_view to show the user what is displayed on the page.",
         parameters={
             "url": {
                 "type": "string",
@@ -77,7 +77,7 @@ class BrowserTool(BaseTool):
     
     @tool(
         name="browser_click",
-        description="Click on elements in the current browser page. Use when clicking page elements is needed.",
+        description="Click on elements in the current browser page. Use when clicking page elements is needed. IMPORTANT: After clicking, you SHOULD call browser_view to show the user the updated page state if the page changed significantly.",
         parameters={
             "index": {
                 "type": "integer",
@@ -114,7 +114,7 @@ class BrowserTool(BaseTool):
     
     @tool(
         name="browser_input",
-        description="Overwrite text in editable elements on the current browser page. Use when filling content in input fields.",
+        description="Overwrite text in editable elements on the current browser page. Use when filling content in input fields. IMPORTANT: After inputting text (especially with press_enter=true), you SHOULD call browser_view to show the user the updated page state.",
         parameters={
             "index": {
                 "type": "integer",
